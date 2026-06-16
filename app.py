@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
 
 # ------------------------------------------------------------
 # Page Configuration
@@ -18,7 +17,7 @@ TENNESSEE_ORANGE = "#FF8200"
 BLACK = "#000000"
 WHITE = "#FFFFFF"
 LIGHT_ORANGE = "#FFF4E8"
-BORDER = "#FF8200"
+LIGHT_BORDER = "#F2D0A8"
 
 # ------------------------------------------------------------
 # Forced Brand Styling
@@ -41,13 +40,20 @@ st.markdown(
         color: {BLACK} !important;
     }}
 
-    .stMarkdown, .stText, .stCaption, .stMetric, .stDataFrame {{
-        color: {BLACK} !important;
+    h1 {{
+        font-weight: 900 !important;
+        letter-spacing: -0.03em !important;
+    }}
+
+    h2 {{
+        font-weight: 850 !important;
+        letter-spacing: -0.02em !important;
     }}
 
     [data-testid="stMetricValue"] {{
         color: {BLACK} !important;
         font-weight: 800 !important;
+        font-size: 2.5rem !important;
     }}
 
     [data-testid="stMetricLabel"] {{
@@ -61,14 +67,6 @@ st.markdown(
         margin-bottom: 28px;
     }}
 
-    .brand-card {{
-        border: 2px solid {TENNESSEE_ORANGE};
-        border-radius: 18px;
-        padding: 20px;
-        background-color: {WHITE};
-        margin-bottom: 18px;
-    }}
-
     .brand-callout {{
         border-left: 8px solid {TENNESSEE_ORANGE};
         background-color: {LIGHT_ORANGE};
@@ -79,8 +77,13 @@ st.markdown(
     }}
 
     div[data-testid="stExpander"] {{
-        border: 1px solid {TENNESSEE_ORANGE} !important;
-        border-radius: 12px !important;
+        border: 1.5px solid {LIGHT_BORDER} !important;
+        border-radius: 14px !important;
+        background-color: {WHITE} !important;
+        box-shadow: none !important;
+    }}
+
+    div[data-testid="stExpander"] details {{
         background-color: {WHITE} !important;
     }}
 
@@ -91,6 +94,47 @@ st.markdown(
     div[role="radiogroup"] label span:first-child {{
         border-color: {TENNESSEE_ORANGE} !important;
     }}
+
+    .risk-card {{
+        border: 1.5px solid {LIGHT_BORDER};
+        border-radius: 16px;
+        padding: 16px;
+        margin-bottom: 14px;
+        background: {WHITE};
+    }}
+
+    .risk-card-title {{
+        font-size: 1.05rem;
+        font-weight: 800;
+        margin-bottom: 4px;
+    }}
+
+    .risk-card-meta {{
+        font-size: 0.92rem;
+        margin-bottom: 10px;
+    }}
+
+    .risk-bar-track {{
+        width: 100%;
+        height: 18px;
+        border: 1px solid {TENNESSEE_ORANGE};
+        border-radius: 999px;
+        background: {WHITE};
+        overflow: hidden;
+    }}
+
+    .risk-bar-fill {{
+        height: 100%;
+        background: {TENNESSEE_ORANGE};
+        border-radius: 999px;
+    }}
+
+    .risk-score-label {{
+        font-size: 0.92rem;
+        font-weight: 800;
+        margin-top: 6px;
+        color: {BLACK};
+    }}
     </style>
     """,
     unsafe_allow_html=True
@@ -100,125 +144,18 @@ st.markdown(
 # Simulated No-PHI Revenue Cycle Data
 # ------------------------------------------------------------
 workflow_data = [
-    ["Patient Scheduling", "Patient Access", "Medium to High", 72, "Appointment Accuracy Rate", "Scheduling / Patient Access",
-     "Captures the appointment request, visit reason, service type, provider, location, and initial patient information.",
-     "Visit reason may be vague, wrong service type may be selected, referral need may be missed, or authorization risk may not be flagged.",
-     "The patient may experience delays, rescheduling, repeated calls, or confusion about what is needed before the visit.",
-     "Staff may need to correct visit type, call the patient again, or urgently involve authorization or eligibility teams.",
-     "Incorrect scheduling can delay clearance, create authorization misses, increase denial risk, and cause downstream rework.",
-     "Use a scheduling intake checklist that confirms reason for visit, service type, referral need, and authorization trigger.",
-     "Review specialty services, imaging, procedures, and high-cost services before the date of service.",
-     "This shows I understand that revenue cycle risk can begin before the patient arrives. Scheduling is the first control point in denial prevention."],
-
-    ["Patient Registration", "Patient Access", "High", 81, "Registration Accuracy Rate", "Registration / Front Desk",
-     "Captures demographics, contact information, insurance information, guarantor details, consent forms, and account setup.",
-     "Demographic errors, duplicate accounts, incorrect insurance entry, missing consent forms, or unclear guarantor information.",
-     "The patient may receive incorrect communication, duplicate statements, or billing confusion.",
-     "Staff may need to correct accounts, update insurance, merge duplicates, or respond to patient billing concerns.",
-     "Registration errors can create claim rejections, billing delays, denial risk, and increased cost to collect.",
-     "Use a registration quality checklist before the patient encounter is finalized.",
-     "Review duplicate accounts, mismatched patient identifiers, guarantor confusion, and repeated registration errors.",
-     "This shows I understand clean front-end data as the foundation for clean claims and accurate patient communication."],
-
-    ["Insurance Verification", "Financial Clearance", "High", 84, "Insurance Verification Completion Rate", "Patient Access / Financial Clearance",
-     "Confirms that payer, member ID, group number, plan type, subscriber information, and coordination of benefits are accurate.",
-     "Outdated insurance card, wrong payer selected, incorrect member ID, missed secondary coverage, or unclear coordination of benefits.",
-     "The patient may receive unexpected bills or be asked to provide insurance information again after the visit.",
-     "Staff may need to correct insurance, rebill claims, contact the patient, or resolve payer mismatches.",
-     "Insurance errors can cause claim rejections, delayed reimbursement, and avoidable administrative rework.",
-     "Confirm payer, plan, member ID, group number, subscriber, secondary coverage, and coordination of benefits before service.",
-     "Review accounts with multiple plans, recent insurance changes, or conflicting payer responses.",
-     "This shows I understand the difference between entering insurance and verifying that insurance is usable for the revenue cycle."],
-
-    ["Eligibility Verification", "Financial Clearance", "High", 86, "Eligibility Clearance Rate", "Eligibility / Financial Clearance",
-     "Confirms active coverage for the date of service and checks benefit rules that may affect reimbursement.",
-     "Coverage may be active, but benefits, referral needs, authorization indicators, or patient responsibility may be missed.",
-     "The patient may face unexpected financial responsibility, delayed care, or confusing billing communication.",
-     "Staff may need to recheck benefits, contact payers, update financial clearance, or resolve preventable denials.",
-     "Eligibility failures can cause coverage denials, patient balance disputes, delayed payment, and write-off risk.",
-     "Use a two-level review: active coverage plus service-specific benefit verification.",
-     "Review unclear payer responses, high patient responsibility, complex benefit rules, or service exclusions.",
-     "This shows I understand eligibility verification as a revenue protection function, not just a checkbox."],
-
-    ["Prior Authorization", "Authorization", "Critical", 94, "Authorization Turnaround Time", "Prior Authorization / Clinical / Patient Access",
-     "Confirms whether payer approval is required before service and tracks approval status before claim submission.",
-     "Authorization may be missed, submitted late, approved for the wrong code, wrong date, wrong provider, or unsupported by documentation.",
-     "The patient may experience delays, rescheduling, uncertainty, denied coverage, or unexpected financial responsibility.",
-     "Staff may need urgent payer calls, documentation requests, retroactive reviews, appeals, or account corrections.",
-     "Missing authorization can lead to full denial, delayed reimbursement, increased A/R, and write-off risk.",
-     "Create a pre-service authorization checkpoint for service code, diagnosis support, location, date range, and approval number.",
-     "Review high-cost services, imaging, procedures, specialty care, incomplete documentation, and denied or pending authorizations.",
-     "This shows I understand how prior authorization connects payer rules, documentation, patient access, claims, denials, and patient experience."],
-
-    ["Clinical Documentation", "Documentation", "High", 88, "Documentation Completion Rate", "Providers / Clinical Support / HIM",
-     "Records why care was needed, what was performed, and whether the service supports coding, billing, authorization, and medical necessity.",
-     "Medical necessity may be unclear, provider note may be incomplete, diagnosis may not support service, or required forms may be missing.",
-     "The patient may experience delayed authorization, delayed claim resolution, denied coverage, or billing confusion.",
-     "Staff may need provider queries, claim holds, additional documentation requests, or appeal support.",
-     "Documentation gaps can cause medical necessity denials, claim delays, compliance risk, and avoidable rework.",
-     "Use a documentation readiness review for high-risk services before coding and claim submission.",
-     "Review incomplete, inconsistent, delayed, or unclear documentation before the claim moves forward.",
-     "This shows I understand documentation as both a clinical record and an operational revenue cycle control point."],
-
-    ["Coding Readiness", "Coding / HIM", "High", 82, "Coding Query Rate", "Coding / HIM / Providers",
-     "Determines whether documentation is complete and clear enough for accurate, supported code assignment.",
-     "Documentation may not support the code, modifiers may be missing, diagnosis and procedure may not align, or provider clarification may be delayed.",
-     "The patient may experience delayed claim processing, delayed statements, or confusion about claim status.",
-     "Coders may need to query providers, hold claims, review records multiple times, or escalate documentation concerns.",
-     "Coding readiness issues can delay claims, increase denial risk, reduce clean claim performance, and affect reimbursement accuracy.",
-     "Create a coding readiness checklist for documentation support, diagnosis alignment, procedure support, and modifier review.",
-     "Review complex encounters, unclear notes, high-dollar services, missing modifiers, and repeated coding-related denials.",
-     "This shows I understand coding readiness from an operations perspective without claiming to be a certified coder."],
-
-    ["Claim Submission", "Claims", "High", 85, "Clean Claim Rate", "Billing / Coding / Claims",
-     "Sends the completed claim to the payer using patient, payer, authorization, documentation, coding, provider, and charge information.",
-     "Claim may contain incorrect demographics, missing authorization, wrong provider, missing modifier, unresolved edits, or incomplete documentation.",
-     "The patient may receive delayed billing updates, unexpected statements, or repeated requests for information.",
-     "Billing staff may need to correct claims, resolve edits, rebill payers, or send claims back upstream.",
-     "Submission errors can cause rejections, denials, delayed payment, increased A/R, and reduced first-pass resolution.",
-     "Use a claim readiness validation step before submission.",
-     "Review high-dollar claims, authorization-required services, unresolved edits, and repeated payer-specific issues.",
-     "This shows I understand that a clean claim depends on clean workflow before billing."],
-
-    ["Denial Prevention", "Denials", "Critical", 92, "Preventable Denial Rate", "RCM / Denials / Patient Access",
-     "Identifies and corrects risks before claims deny by using trend analysis, root-cause review, edits, and feedback loops.",
-     "Teams may fix individual claims without tracing root causes, denial data may not reach upstream teams, or prevention owners may not be assigned.",
-     "The patient may experience confusing bills, delayed resolution, unexpected balances, or reduced trust.",
-     "Staff may spend time appealing preventable denials, contacting payers, correcting records, and reworking accounts.",
-     "Preventable denials increase cost to collect, delay reimbursement, increase write-off risk, and reduce cash predictability.",
-     "Create a denial prevention feedback loop that tracks denial reason, first workflow breakdown, prevention owner, and corrective action.",
-     "Review whether the denial started in scheduling, registration, eligibility, authorization, documentation, coding, claims, or payer behavior.",
-     "This shows I understand denial prevention as a system-wide operations function, not just back-end claim correction."],
-
-    ["A/R Follow-Up", "Accounts Receivable", "High", 87, "Days in A/R", "A/R Follow-Up / Billing",
-     "Monitors unpaid claims, payer delays, denials, underpayments, missing information, appeal deadlines, and aging accounts.",
-     "Work queues may not be prioritized, high-dollar accounts may age, payer requests may be missed, or ownership may be unclear.",
-     "The patient may experience delayed account resolution, late statements, or confusing balance changes.",
-     "Staff may face backlog growth, repeated payer calls, rushed appeals, and unclear account ownership.",
-     "A/R delays reduce cash flow, increase days in A/R, increase write-off risk, and weaken forecasting.",
-     "Prioritize A/R queues by claim age, dollar amount, payer, denial status, appeal deadline, and last action date.",
-     "Review aged accounts, high-dollar claims, denied claims, underpayments, payer requests, and accounts nearing deadlines.",
-     "This shows I understand revenue cycle follow-up requires prioritization, ownership, documentation, and escalation."],
-
-    ["Payment Posting", "Cash Applications", "Medium to High", 76, "Payment Posting Accuracy Rate", "Payment Posting / Cash Applications",
-     "Records payer payments, contractual adjustments, denials, underpayments, patient responsibility, and remaining balances.",
-     "Payment may post to wrong account, adjustment may be incorrect, denial code may be missed, underpayment may not be identified, or secondary billing may not trigger.",
-     "The patient may receive an incorrect bill, delayed statement, duplicate bill, or inaccurate balance.",
-     "Staff may need to correct posting errors, resolve unapplied cash, review remittance advice, or answer billing questions.",
-     "Posting errors can distort reports, hide denials, delay secondary billing, and misstate cash performance.",
-     "Use payment posting quality review for account, payer, amount, adjustment, denial code, patient responsibility, and secondary billing trigger.",
-     "Review underpayments, unusual adjustments, large balances, unclear remittance codes, denied line items, and unapplied cash.",
-     "This shows I understand revenue cycle does not end when money arrives. Payment must be posted accurately for trustworthy reporting."],
-
-    ["Executive Financial Visibility", "Leadership Reporting", "High", 83, "Revenue Cycle Dashboard Accuracy", "Revenue Cycle Leadership / Operations",
-     "Turns revenue cycle workflow activity into leadership insight about cash flow, denial trends, operational risk, staffing burden, and patient experience.",
-     "Reports may show outcomes without root causes, denial trends may not connect to upstream workflow, or staff rework burden may remain invisible.",
-     "Patients may continue experiencing billing confusion, delays, and unclear communication if leadership cannot see workflow causes.",
-     "Staff may continue preventable rework without leadership seeing workload pressure or root-cause patterns.",
-     "Poor visibility can cause delayed decisions, preventable denials, cash instability, inaccurate forecasting, and avoidable write-offs.",
-     "Build an executive dashboard connecting front-end errors, authorization risk, documentation gaps, denials, A/R delays, payment accuracy, and patient impact.",
-     "Review trends to distinguish internal workflow failures from payer behavior and decide which improvements should be prioritized.",
-     "This shows I understand healthcare operations from a leadership perspective: reporting should show where the workflow lost control."]
+    ["Patient Scheduling", "Patient Access", "Medium to High", 72, "Appointment Accuracy Rate", "Scheduling / Patient Access", "Captures the appointment request, visit reason, service type, provider, location, and initial patient information.", "Visit reason may be vague, wrong service type may be selected, referral need may be missed, or authorization risk may not be flagged.", "The patient may experience delays, rescheduling, repeated calls, or confusion about what is needed before the visit.", "Staff may need to correct visit type, call the patient again, or urgently involve authorization or eligibility teams.", "Incorrect scheduling can delay clearance, create authorization misses, increase denial risk, and cause downstream rework.", "Use a scheduling intake checklist that confirms reason for visit, service type, referral need, and authorization trigger.", "Review specialty services, imaging, procedures, and high-cost services before the date of service.", "This shows I understand that revenue cycle risk can begin before the patient arrives. Scheduling is the first control point in denial prevention."],
+    ["Patient Registration", "Patient Access", "High", 81, "Registration Accuracy Rate", "Registration / Front Desk", "Captures demographics, contact information, insurance information, guarantor details, consent forms, and account setup.", "Demographic errors, duplicate accounts, incorrect insurance entry, missing consent forms, or unclear guarantor information.", "The patient may receive incorrect communication, duplicate statements, or billing confusion.", "Staff may need to correct accounts, update insurance, merge duplicates, or respond to patient billing concerns.", "Registration errors can create claim rejections, billing delays, denial risk, and increased cost to collect.", "Use a registration quality checklist before the patient encounter is finalized.", "Review duplicate accounts, mismatched patient identifiers, guarantor confusion, and repeated registration errors.", "This shows I understand clean front-end data as the foundation for clean claims and accurate patient communication."],
+    ["Insurance Verification", "Financial Clearance", "High", 84, "Insurance Verification Completion Rate", "Patient Access / Financial Clearance", "Confirms that payer, member ID, group number, plan type, subscriber information, and coordination of benefits are accurate.", "Outdated insurance card, wrong payer selected, incorrect member ID, missed secondary coverage, or unclear coordination of benefits.", "The patient may receive unexpected bills or be asked to provide insurance information again after the visit.", "Staff may need to correct insurance, rebill claims, contact the patient, or resolve payer mismatches.", "Insurance errors can cause claim rejections, delayed reimbursement, and avoidable administrative rework.", "Confirm payer, plan, member ID, group number, subscriber, secondary coverage, and coordination of benefits before service.", "Review accounts with multiple plans, recent insurance changes, or conflicting payer responses.", "This shows I understand the difference between entering insurance and verifying that insurance is usable for the revenue cycle."],
+    ["Eligibility Verification", "Financial Clearance", "High", 86, "Eligibility Clearance Rate", "Eligibility / Financial Clearance", "Confirms active coverage for the date of service and checks benefit rules that may affect reimbursement.", "Coverage may be active, but benefits, referral needs, authorization indicators, or patient responsibility may be missed.", "The patient may face unexpected financial responsibility, delayed care, or confusing billing communication.", "Staff may need to recheck benefits, contact payers, update financial clearance, or resolve preventable denials.", "Eligibility failures can cause coverage denials, patient balance disputes, delayed payment, and write-off risk.", "Use a two-level review: active coverage plus service-specific benefit verification.", "Review unclear payer responses, high patient responsibility, complex benefit rules, or service exclusions.", "This shows I understand eligibility verification as a revenue protection function, not just a checkbox."],
+    ["Prior Authorization", "Authorization", "Critical", 94, "Authorization Turnaround Time", "Prior Authorization / Clinical / Patient Access", "Confirms whether payer approval is required before service and tracks approval status before claim submission.", "Authorization may be missed, submitted late, approved for the wrong code, wrong date, wrong provider, or unsupported by documentation.", "The patient may experience delays, rescheduling, uncertainty, denied coverage, or unexpected financial responsibility.", "Staff may need urgent payer calls, documentation requests, retroactive reviews, appeals, or account corrections.", "Missing authorization can lead to full denial, delayed reimbursement, increased A/R, and write-off risk.", "Create a pre-service authorization checkpoint for service code, diagnosis support, location, date range, and approval number.", "Review high-cost services, imaging, procedures, specialty care, incomplete documentation, and denied or pending authorizations.", "This shows I understand how prior authorization connects payer rules, documentation, patient access, claims, denials, and patient experience."],
+    ["Clinical Documentation", "Documentation", "High", 88, "Documentation Completion Rate", "Providers / Clinical Support / HIM", "Records why care was needed, what was performed, and whether the service supports coding, billing, authorization, and medical necessity.", "Medical necessity may be unclear, provider note may be incomplete, diagnosis may not support service, or required forms may be missing.", "The patient may experience delayed authorization, delayed claim resolution, denied coverage, or billing confusion.", "Staff may need provider queries, claim holds, additional documentation requests, or appeal support.", "Documentation gaps can cause medical necessity denials, claim delays, compliance risk, and avoidable rework.", "Use a documentation readiness review for high-risk services before coding and claim submission.", "Review incomplete, inconsistent, delayed, or unclear documentation before the claim moves forward.", "This shows I understand documentation as both a clinical record and an operational revenue cycle control point."],
+    ["Coding Readiness", "Coding / HIM", "High", 82, "Coding Query Rate", "Coding / HIM / Providers", "Determines whether documentation is complete and clear enough for accurate, supported code assignment.", "Documentation may not support the code, modifiers may be missing, diagnosis and procedure may not align, or provider clarification may be delayed.", "The patient may experience delayed claim processing, delayed statements, or confusion about claim status.", "Coders may need to query providers, hold claims, review records multiple times, or escalate documentation concerns.", "Coding readiness issues can delay claims, increase denial risk, reduce clean claim performance, and affect reimbursement accuracy.", "Create a coding readiness checklist for documentation support, diagnosis alignment, procedure support, and modifier review.", "Review complex encounters, unclear notes, high-dollar services, missing modifiers, and repeated coding-related denials.", "This shows I understand coding readiness from an operations perspective without claiming to be a certified coder."],
+    ["Claim Submission", "Claims", "High", 85, "Clean Claim Rate", "Billing / Coding / Claims", "Sends the completed claim to the payer using patient, payer, authorization, documentation, coding, provider, and charge information.", "Claim may contain incorrect demographics, missing authorization, wrong provider, missing modifier, unresolved edits, or incomplete documentation.", "The patient may receive delayed billing updates, unexpected statements, or repeated requests for information.", "Billing staff may need to correct claims, resolve edits, rebill payers, or send claims back upstream.", "Submission errors can cause rejections, denials, delayed payment, increased A/R, and reduced first-pass resolution.", "Use a claim readiness validation step before submission.", "Review high-dollar claims, authorization-required services, unresolved edits, and repeated payer-specific issues.", "This shows I understand that a clean claim depends on clean workflow before billing."],
+    ["Denial Prevention", "Denials", "Critical", 92, "Preventable Denial Rate", "RCM / Denials / Patient Access", "Identifies and corrects risks before claims deny by using trend analysis, root-cause review, edits, and feedback loops.", "Teams may fix individual claims without tracing root causes, denial data may not reach upstream teams, or prevention owners may not be assigned.", "The patient may experience confusing bills, delayed resolution, unexpected balances, or reduced trust.", "Staff may spend time appealing preventable denials, contacting payers, correcting records, and reworking accounts.", "Preventable denials increase cost to collect, delay reimbursement, increase write-off risk, and reduce cash predictability.", "Create a denial prevention feedback loop that tracks denial reason, first workflow breakdown, prevention owner, and corrective action.", "Review whether the denial started in scheduling, registration, eligibility, authorization, documentation, coding, claims, or payer behavior.", "This shows I understand denial prevention as a system-wide operations function, not just back-end claim correction."],
+    ["A/R Follow-Up", "Accounts Receivable", "High", 87, "Days in A/R", "A/R Follow-Up / Billing", "Monitors unpaid claims, payer delays, denials, underpayments, missing information, appeal deadlines, and aging accounts.", "Work queues may not be prioritized, high-dollar accounts may age, payer requests may be missed, or ownership may be unclear.", "The patient may experience delayed account resolution, late statements, or confusing balance changes.", "Staff may face backlog growth, repeated payer calls, rushed appeals, and unclear account ownership.", "A/R delays reduce cash flow, increase days in A/R, increase write-off risk, and weaken forecasting.", "Prioritize A/R queues by claim age, dollar amount, payer, denial status, appeal deadline, and last action date.", "Review aged accounts, high-dollar claims, denied claims, underpayments, payer requests, and accounts nearing deadlines.", "This shows I understand revenue cycle follow-up requires prioritization, ownership, documentation, and escalation."],
+    ["Payment Posting", "Cash Applications", "Medium to High", 76, "Payment Posting Accuracy Rate", "Payment Posting / Cash Applications", "Records payer payments, contractual adjustments, denials, underpayments, patient responsibility, and remaining balances.", "Payment may post to wrong account, adjustment may be incorrect, denial code may be missed, underpayment may not be identified, or secondary billing may not trigger.", "The patient may receive an incorrect bill, delayed statement, duplicate bill, or inaccurate balance.", "Staff may need to correct posting errors, resolve unapplied cash, review remittance advice, or answer billing questions.", "Posting errors can distort reports, hide denials, delay secondary billing, and misstate cash performance.", "Use payment posting quality review for account, payer, amount, adjustment, denial code, patient responsibility, and secondary billing trigger.", "Review underpayments, unusual adjustments, large balances, unclear remittance codes, denied line items, and unapplied cash.", "This shows I understand revenue cycle does not end when money arrives. Payment must be posted accurately for trustworthy reporting."],
+    ["Executive Financial Visibility", "Leadership Reporting", "High", 83, "Revenue Cycle Dashboard Accuracy", "Revenue Cycle Leadership / Operations", "Turns revenue cycle workflow activity into leadership insight about cash flow, denial trends, operational risk, staffing burden, and patient experience.", "Reports may show outcomes without root causes, denial trends may not connect to upstream workflow, or staff rework burden may remain invisible.", "Patients may continue experiencing billing confusion, delays, and unclear communication if leadership cannot see workflow causes.", "Staff may continue preventable rework without leadership seeing workload pressure or root-cause patterns.", "Poor visibility can cause delayed decisions, preventable denials, cash instability, inaccurate forecasting, and avoidable write-offs.", "Build an executive dashboard connecting front-end errors, authorization risk, documentation gaps, denials, A/R delays, payment accuracy, and patient impact.", "Review trends to distinguish internal workflow failures from payer behavior and decide which improvements should be prioritized.", "This shows I understand healthcare operations from a leadership perspective: reporting should show where the workflow lost control."]
 ]
 
 columns = [
@@ -260,7 +197,7 @@ def stage_card(row):
     col1, col2, col3 = st.columns(3)
     col1.metric("Risk Score", f"{row['Risk Score']}/100")
     col2.metric("Metric Affected", row["Metric Affected"])
-    col3.metric("Risk Level", row["Risk Level"])
+    col3.markdown(f"**Risk Level:** <span style='color:{TENNESSEE_ORANGE}; font-weight:900;'>{row['Risk Level']}</span>", unsafe_allow_html=True)
 
     st.markdown(f"**Team Involved:** {row['Team Involved']}")
 
@@ -280,28 +217,26 @@ def stage_card(row):
             st.write(row[key])
 
 
-def brand_horizontal_bar(dataframe, x_col, y_col, title):
-    fig = px.bar(
-        dataframe,
-        x=x_col,
-        y=y_col,
-        orientation="h",
-        text=x_col,
-        title=title
-    )
-    fig.update_traces(marker_color=TENNESSEE_ORANGE, textposition="outside")
-    fig.update_layout(
-        plot_bgcolor=WHITE,
-        paper_bgcolor=WHITE,
-        font=dict(color=BLACK, size=14),
-        title=dict(font=dict(color=BLACK, size=20)),
-        xaxis=dict(color=BLACK, gridcolor="#F1F1F1", range=[0, 100]),
-        yaxis=dict(color=BLACK, autorange="reversed"),
-        showlegend=False,
-        margin=dict(l=10, r=20, t=70, b=30),
-        height=650
-    )
-    return fig
+def orange_risk_bars(dataframe, title, label_col):
+    st.markdown(f"## {title}")
+    sorted_df = dataframe.sort_values("Risk Score", ascending=False)
+    for _, row in sorted_df.iterrows():
+        label = row[label_col]
+        score = int(row["Risk Score"])
+        meta = f"{row['Risk Level']} risk · {row['Metric Affected']}" if "Metric Affected" in row else f"Average risk score: {score}/100"
+        st.markdown(
+            f"""
+            <div class='risk-card'>
+                <div class='risk-card-title'>{label}</div>
+                <div class='risk-card-meta'>{meta}</div>
+                <div class='risk-bar-track'>
+                    <div class='risk-bar-fill' style='width:{score}%;'></div>
+                </div>
+                <div class='risk-score-label'>{score}/100</div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
 # ------------------------------------------------------------
 # Pages
@@ -314,9 +249,7 @@ if page == "Home":
     st.markdown("<div class='orange-divider'></div>", unsafe_allow_html=True)
     st.write("This dashboard is designed to answer one core healthcare operations question:")
     st.markdown("## Where did the workflow first lose control?")
-    st.write(
-        "Revenue cycle problems rarely begin where they are discovered. A denial may appear in billing, an aging balance may appear in A/R, and a cash flow issue may appear in executive reports. But the original breakdown often begins earlier in scheduling, registration, insurance verification, eligibility verification, prior authorization, documentation, or claim readiness."
-    )
+    st.write("Revenue cycle problems rarely begin where they are discovered. A denial may appear in billing, an aging balance may appear in A/R, and a cash flow issue may appear in executive reports. But the original breakdown often begins earlier in scheduling, registration, insurance verification, eligibility verification, prior authorization, documentation, or claim readiness.")
 
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Workflow Stages", "12")
@@ -325,9 +258,7 @@ if page == "Home":
     col4.metric("Critical Risk Areas", len(df[df["Risk Level"] == "Critical"]))
 
     st.markdown("## Portfolio Positioning")
-    st.write(
-        "This simulated project demonstrates healthcare operations thinking across the full revenue cycle. It connects workflow risk, staff rework, patient experience, financial performance, denial prevention, and leadership visibility using synthetic no-PHI examples only."
-    )
+    st.write("This simulated project demonstrates healthcare operations thinking across the full revenue cycle. It connects workflow risk, staff rework, patient experience, financial performance, denial prevention, and leadership visibility using synthetic no-PHI examples only.")
 
 elif page == "Revenue Cycle Workflow Map":
     st.title("Revenue Cycle Workflow Map")
@@ -337,26 +268,14 @@ elif page == "Revenue Cycle Workflow Map":
         use_container_width=True,
         hide_index=True
     )
-    st.plotly_chart(
-        brand_horizontal_bar(
-            df.sort_values("Risk Score", ascending=True),
-            "Risk Score",
-            "Stage",
-            "Simulated Revenue Cycle Risk Score by Workflow Stage"
-        ),
-        use_container_width=True
-    )
+    orange_risk_bars(df, "Simulated Revenue Cycle Risk Score by Workflow Stage", "Stage")
     st.markdown("## Workflow Connection")
-    st.write(
-        "Each stage depends on the quality of the stage before it. When the workflow loses control upstream, the downstream impact can appear as a denial, claim delay, A/R backlog, payment posting error, patient billing issue, or executive reporting gap."
-    )
+    st.write("Each stage depends on the quality of the stage before it. When the workflow loses control upstream, the downstream impact can appear as a denial, claim delay, A/R backlog, payment posting error, patient billing issue, or executive reporting gap.")
 
 elif page == "Patient Access Risk":
     st.title("Patient Access Risk")
     st.write("Patient access includes scheduling, registration, insurance verification, and eligibility verification.")
-    patient_access_df = df[df["Stage"].isin([
-        "Patient Scheduling", "Patient Registration", "Insurance Verification", "Eligibility Verification"
-    ])]
+    patient_access_df = df[df["Stage"].isin(["Patient Scheduling", "Patient Registration", "Insurance Verification", "Eligibility Verification"])]
     for _, row in patient_access_df.iterrows():
         stage_card(row)
 
@@ -400,17 +319,11 @@ elif page == "Financial Outcome Dashboard":
     col3.metric("Simulated Days in A/R", "41 days", "+6 days")
     col4.metric("Simulated Payment Posting Accuracy", "94%", "-2% risk")
 
-    st.markdown("## Financial Risk by Workflow Category")
-    category_risk = df.groupby("Category", as_index=False)["Risk Score"].mean().sort_values("Risk Score", ascending=True)
-    st.plotly_chart(
-        brand_horizontal_bar(
-            category_risk,
-            "Risk Score",
-            "Category",
-            "Average Simulated Risk Score by Revenue Cycle Category"
-        ),
-        use_container_width=True
-    )
+    category_risk = df.groupby("Category", as_index=False)["Risk Score"].mean()
+    category_risk["Risk Score"] = category_risk["Risk Score"].round(0).astype(int)
+    category_risk["Risk Level"] = "Simulated category average"
+    category_risk["Metric Affected"] = "Category risk visibility"
+    orange_risk_bars(category_risk, "Financial Risk by Workflow Category", "Category")
 
     st.markdown("## Simulated Financial Impact Logic")
     st.write("""
@@ -423,9 +336,7 @@ elif page == "Financial Outcome Dashboard":
 
 elif page == "Executive Summary":
     st.title("Executive Summary")
-    st.write(
-        "The Healthcare Revenue Cycle Intelligence Engine™ is a simulated operations dashboard designed to show how revenue cycle workflows connect from patient scheduling through payment posting."
-    )
+    st.write("The Healthcare Revenue Cycle Intelligence Engine™ is a simulated operations dashboard designed to show how revenue cycle workflows connect from patient scheduling through payment posting.")
     st.markdown("## Key Findings")
     st.write("""
     1. The highest simulated risk areas are prior authorization, denial prevention, documentation integrity, and A/R follow-up.
@@ -455,10 +366,6 @@ elif page == "Disclaimer":
         unsafe_allow_html=True
     )
     st.markdown("## No-PHI Statement")
-    st.write(
-        "This app does not include real patient data, protected health information, payer data, employer data, claims data, clinical records, financial records, or confidential organizational information."
-    )
+    st.write("This app does not include real patient data, protected health information, payer data, employer data, claims data, clinical records, financial records, or confidential organizational information.")
     st.markdown("## Educational Purpose")
-    st.write(
-        "The purpose of this project is to demonstrate healthcare operations thinking, revenue cycle workflow awareness, denial prevention logic, process improvement understanding, and patient-to-professional perspective."
-    )
+    st.write("The purpose of this project is to demonstrate healthcare operations thinking, revenue cycle workflow awareness, denial prevention logic, process improvement understanding, and patient-to-professional perspective.")
