@@ -1,27 +1,18 @@
 import streamlit as st
 import pandas as pd
 
-# ------------------------------------------------------------
-# Page Configuration
-# ------------------------------------------------------------
 st.set_page_config(
     page_title="Healthcare Revenue Cycle Intelligence Engine™",
     page_icon="🏥",
     layout="wide"
 )
 
-# ------------------------------------------------------------
-# Brand Colors
-# ------------------------------------------------------------
 TENNESSEE_ORANGE = "#FF8200"
 BLACK = "#000000"
 WHITE = "#FFFFFF"
 LIGHT_ORANGE = "#FFF4E8"
 LIGHT_BORDER = "#F2D0A8"
 
-# ------------------------------------------------------------
-# Forced Brand Styling
-# ------------------------------------------------------------
 st.markdown(
     f"""
     <style>
@@ -31,118 +22,61 @@ st.markdown(
         background-color: {WHITE} !important;
         color: {BLACK} !important;
     }}
+    [data-testid="stSidebar"] {{ border-right: 2px solid {TENNESSEE_ORANGE} !important; }}
+    h1, h2, h3, h4, h5, h6, p, div, span, label, li, td, th {{ color: {BLACK} !important; }}
+    h1 {{ font-weight: 900 !important; letter-spacing: -0.03em !important; }}
+    h2 {{ font-weight: 850 !important; letter-spacing: -0.02em !important; }}
+    .orange-divider {{ border-top: 4px solid {TENNESSEE_ORANGE}; margin-top: 18px; margin-bottom: 28px; }}
+    .brand-callout {{ border-left: 8px solid {TENNESSEE_ORANGE}; background-color: {LIGHT_ORANGE}; padding: 18px; border-radius: 10px; margin-bottom: 20px; color: {BLACK}; }}
+    div[data-testid="stExpander"] {{ border: 1.5px solid {LIGHT_BORDER} !important; border-radius: 14px !important; background-color: {WHITE} !important; box-shadow: none !important; }}
+    button, [role="button"] {{ color: {BLACK} !important; }}
+    div[role="radiogroup"] label span:first-child {{ border-color: {TENNESSEE_ORANGE} !important; }}
 
-    [data-testid="stSidebar"] {{
-        border-right: 2px solid {TENNESSEE_ORANGE} !important;
+    .metric-grid {{
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+        margin-bottom: 18px;
     }}
-
-    h1, h2, h3, h4, h5, h6, p, div, span, label, li, td, th {{
-        color: {BLACK} !important;
-    }}
-
-    h1 {{
-        font-weight: 900 !important;
-        letter-spacing: -0.03em !important;
-    }}
-
-    h2 {{
-        font-weight: 850 !important;
-        letter-spacing: -0.02em !important;
-    }}
-
-    [data-testid="stMetricValue"] {{
-        color: {BLACK} !important;
-        font-weight: 800 !important;
-        font-size: 2.5rem !important;
-    }}
-
-    [data-testid="stMetricLabel"] {{
-        color: {BLACK} !important;
-        font-weight: 700 !important;
-    }}
-
-    .orange-divider {{
-        border-top: 4px solid {TENNESSEE_ORANGE};
-        margin-top: 18px;
-        margin-bottom: 28px;
-    }}
-
-    .brand-callout {{
-        border-left: 8px solid {TENNESSEE_ORANGE};
-        background-color: {LIGHT_ORANGE};
-        padding: 18px;
-        border-radius: 10px;
-        margin-bottom: 20px;
-        color: {BLACK};
-    }}
-
-    div[data-testid="stExpander"] {{
-        border: 1.5px solid {LIGHT_BORDER} !important;
-        border-radius: 14px !important;
-        background-color: {WHITE} !important;
-        box-shadow: none !important;
-    }}
-
-    div[data-testid="stExpander"] details {{
-        background-color: {WHITE} !important;
-    }}
-
-    button, [role="button"] {{
-        color: {BLACK} !important;
-    }}
-
-    div[role="radiogroup"] label span:first-child {{
-        border-color: {TENNESSEE_ORANGE} !important;
-    }}
-
-    .risk-card {{
+    .metric-box {{
         border: 1.5px solid {LIGHT_BORDER};
         border-radius: 16px;
-        padding: 16px;
-        margin-bottom: 14px;
+        padding: 14px;
         background: {WHITE};
+        min-width: 0;
     }}
-
-    .risk-card-title {{
-        font-size: 1.05rem;
-        font-weight: 800;
-        margin-bottom: 4px;
+    .metric-label {{
+        font-size: 0.9rem;
+        font-weight: 750;
+        margin-bottom: 8px;
     }}
-
-    .risk-card-meta {{
-        font-size: 0.92rem;
-        margin-bottom: 10px;
+    .metric-value {{
+        font-size: 1.35rem;
+        line-height: 1.2;
+        font-weight: 850;
+        overflow-wrap: anywhere;
+        word-break: normal;
     }}
+    .metric-value-orange {{ color: {TENNESSEE_ORANGE} !important; }}
 
-    .risk-bar-track {{
-        width: 100%;
-        height: 18px;
-        border: 1px solid {TENNESSEE_ORANGE};
-        border-radius: 999px;
-        background: {WHITE};
-        overflow: hidden;
-    }}
+    .risk-card {{ border: 1.5px solid {LIGHT_BORDER}; border-radius: 16px; padding: 16px; margin-bottom: 14px; background: {WHITE}; }}
+    .risk-card-title {{ font-size: 1.05rem; font-weight: 800; margin-bottom: 4px; }}
+    .risk-card-meta {{ font-size: 0.92rem; margin-bottom: 10px; }}
+    .risk-bar-track {{ width: 100%; height: 18px; border: 1px solid {TENNESSEE_ORANGE}; border-radius: 999px; background: {WHITE}; overflow: hidden; }}
+    .risk-bar-fill {{ height: 100%; background: {TENNESSEE_ORANGE}; border-radius: 999px; }}
+    .risk-score-label {{ font-size: 0.92rem; font-weight: 800; margin-top: 6px; color: {BLACK}; }}
 
-    .risk-bar-fill {{
-        height: 100%;
-        background: {TENNESSEE_ORANGE};
-        border-radius: 999px;
-    }}
-
-    .risk-score-label {{
-        font-size: 0.92rem;
-        font-weight: 800;
-        margin-top: 6px;
-        color: {BLACK};
+    @media (max-width: 760px) {{
+        .metric-grid {{ grid-template-columns: 1fr; }}
+        .metric-value {{ font-size: 1.25rem; }}
+        h1 {{ font-size: 2.6rem !important; }}
+        h2 {{ font-size: 2rem !important; }}
     }}
     </style>
     """,
     unsafe_allow_html=True
 )
 
-# ------------------------------------------------------------
-# Simulated No-PHI Revenue Cycle Data
-# ------------------------------------------------------------
 workflow_data = [
     ["Patient Scheduling", "Patient Access", "Medium to High", 72, "Appointment Accuracy Rate", "Scheduling / Patient Access", "Captures the appointment request, visit reason, service type, provider, location, and initial patient information.", "Visit reason may be vague, wrong service type may be selected, referral need may be missed, or authorization risk may not be flagged.", "The patient may experience delays, rescheduling, repeated calls, or confusion about what is needed before the visit.", "Staff may need to correct visit type, call the patient again, or urgently involve authorization or eligibility teams.", "Incorrect scheduling can delay clearance, create authorization misses, increase denial risk, and cause downstream rework.", "Use a scheduling intake checklist that confirms reason for visit, service type, referral need, and authorization trigger.", "Review specialty services, imaging, procedures, and high-cost services before the date of service.", "This shows I understand that revenue cycle risk can begin before the patient arrives. Scheduling is the first control point in denial prevention."],
     ["Patient Registration", "Patient Access", "High", 81, "Registration Accuracy Rate", "Registration / Front Desk", "Captures demographics, contact information, insurance information, guarantor details, consent forms, and account setup.", "Demographic errors, duplicate accounts, incorrect insurance entry, missing consent forms, or unclear guarantor information.", "The patient may receive incorrect communication, duplicate statements, or billing confusion.", "Staff may need to correct accounts, update insurance, merge duplicates, or respond to patient billing concerns.", "Registration errors can create claim rejections, billing delays, denial risk, and increased cost to collect.", "Use a registration quality checklist before the patient encounter is finalized.", "Review duplicate accounts, mismatched patient identifiers, guarantor confusion, and repeated registration errors.", "This shows I understand clean front-end data as the foundation for clean claims and accurate patient communication."],
@@ -163,41 +97,35 @@ columns = [
     "What It Does", "What Can Break", "Patient Impact", "Staff Impact", "Financial Impact",
     "Improvement Action", "Human Review Needed", "Recruiter Explanation"
 ]
-
 df = pd.DataFrame(workflow_data, columns=columns)
 
-# ------------------------------------------------------------
-# Sidebar Navigation
-# ------------------------------------------------------------
 st.sidebar.title("Navigation")
 page = st.sidebar.radio(
     "Choose a page",
-    [
-        "Home",
-        "Revenue Cycle Workflow Map",
-        "Patient Access Risk",
-        "Prior Authorization Risk",
-        "Documentation Integrity",
-        "Denial Prevention",
-        "A/R Follow-Up",
-        "Payment Posting",
-        "Financial Outcome Dashboard",
-        "Executive Summary",
-        "Disclaimer"
-    ]
+    ["Home", "Revenue Cycle Workflow Map", "Patient Access Risk", "Prior Authorization Risk", "Documentation Integrity", "Denial Prevention", "A/R Follow-Up", "Payment Posting", "Financial Outcome Dashboard", "Executive Summary", "Disclaimer"]
 )
 
-# ------------------------------------------------------------
-# Helper Functions
-# ------------------------------------------------------------
+def mobile_metric(label, value, orange=False):
+    value_class = "metric-value metric-value-orange" if orange else "metric-value"
+    st.markdown(
+        f"""
+        <div class='metric-box'>
+            <div class='metric-label'>{label}</div>
+            <div class='{value_class}'>{value}</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
 def stage_card(row):
     st.markdown(f"## {row['Stage']}")
     st.markdown("<div class='orange-divider'></div>", unsafe_allow_html=True)
 
-    col1, col2, col3 = st.columns(3)
-    col1.metric("Risk Score", f"{row['Risk Score']}/100")
-    col2.metric("Metric Affected", row["Metric Affected"])
-    col3.markdown(f"**Risk Level:** <span style='color:{TENNESSEE_ORANGE}; font-weight:900;'>{row['Risk Level']}</span>", unsafe_allow_html=True)
+    st.markdown("<div class='metric-grid'>", unsafe_allow_html=True)
+    mobile_metric("Risk Score", f"{row['Risk Score']}/100")
+    mobile_metric("Metric Affected", row["Metric Affected"])
+    mobile_metric("Risk Level", row["Risk Level"], orange=True)
+    st.markdown("</div>", unsafe_allow_html=True)
 
     st.markdown(f"**Team Involved:** {row['Team Involved']}")
 
@@ -211,11 +139,9 @@ def stage_card(row):
         ("Human review needed", "Human Review Needed"),
         ("Recruiter explanation", "Recruiter Explanation"),
     ]
-
     for label, key in sections:
         with st.expander(label, expanded=label in ["What the stage does", "What can break"]):
             st.write(row[key])
-
 
 def orange_risk_bars(dataframe, title, label_col):
     st.markdown(f"## {title}")
@@ -223,51 +149,38 @@ def orange_risk_bars(dataframe, title, label_col):
     for _, row in sorted_df.iterrows():
         label = row[label_col]
         score = int(row["Risk Score"])
-        meta = f"{row['Risk Level']} risk · {row['Metric Affected']}" if "Metric Affected" in row else f"Average risk score: {score}/100"
+        meta = f"{row['Risk Level']} risk · {row['Metric Affected']}"
         st.markdown(
             f"""
             <div class='risk-card'>
                 <div class='risk-card-title'>{label}</div>
                 <div class='risk-card-meta'>{meta}</div>
-                <div class='risk-bar-track'>
-                    <div class='risk-bar-fill' style='width:{score}%;'></div>
-                </div>
+                <div class='risk-bar-track'><div class='risk-bar-fill' style='width:{score}%;'></div></div>
                 <div class='risk-score-label'>{score}/100</div>
             </div>
             """,
             unsafe_allow_html=True
         )
 
-# ------------------------------------------------------------
-# Pages
-# ------------------------------------------------------------
 if page == "Home":
     st.title("Healthcare Revenue Cycle Intelligence Engine™")
-    st.subheader(
-        "A simulated healthcare operations portfolio project showing how patient access, eligibility verification, prior authorization, documentation, claims, denials, A/R follow-up, and payment posting connect to reimbursement, cash flow, staff workload, and patient experience."
-    )
+    st.subheader("A simulated healthcare operations portfolio project showing how patient access, eligibility verification, prior authorization, documentation, claims, denials, A/R follow-up, and payment posting connect to reimbursement, cash flow, staff workload, and patient experience.")
     st.markdown("<div class='orange-divider'></div>", unsafe_allow_html=True)
     st.write("This dashboard is designed to answer one core healthcare operations question:")
     st.markdown("## Where did the workflow first lose control?")
     st.write("Revenue cycle problems rarely begin where they are discovered. A denial may appear in billing, an aging balance may appear in A/R, and a cash flow issue may appear in executive reports. But the original breakdown often begins earlier in scheduling, registration, insurance verification, eligibility verification, prior authorization, documentation, or claim readiness.")
-
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Workflow Stages", "12")
     col2.metric("Highest Risk Score", f"{df['Risk Score'].max()}/100")
     col3.metric("Average Risk Score", f"{round(df['Risk Score'].mean(), 1)}/100")
     col4.metric("Critical Risk Areas", len(df[df["Risk Level"] == "Critical"]))
-
     st.markdown("## Portfolio Positioning")
     st.write("This simulated project demonstrates healthcare operations thinking across the full revenue cycle. It connects workflow risk, staff rework, patient experience, financial performance, denial prevention, and leadership visibility using synthetic no-PHI examples only.")
 
 elif page == "Revenue Cycle Workflow Map":
     st.title("Revenue Cycle Workflow Map")
     st.write("This page shows the full simulated revenue cycle workflow from patient access to executive visibility.")
-    st.dataframe(
-        df[["Stage", "Category", "Risk Level", "Risk Score", "Metric Affected", "Team Involved"]],
-        use_container_width=True,
-        hide_index=True
-    )
+    st.dataframe(df[["Stage", "Category", "Risk Level", "Risk Score", "Metric Affected", "Team Involved"]], use_container_width=True, hide_index=True)
     orange_risk_bars(df, "Simulated Revenue Cycle Risk Score by Workflow Stage", "Stage")
     st.markdown("## Workflow Connection")
     st.write("Each stage depends on the quality of the stage before it. When the workflow loses control upstream, the downstream impact can appear as a denial, claim delay, A/R backlog, payment posting error, patient billing issue, or executive reporting gap.")
@@ -275,8 +188,7 @@ elif page == "Revenue Cycle Workflow Map":
 elif page == "Patient Access Risk":
     st.title("Patient Access Risk")
     st.write("Patient access includes scheduling, registration, insurance verification, and eligibility verification.")
-    patient_access_df = df[df["Stage"].isin(["Patient Scheduling", "Patient Registration", "Insurance Verification", "Eligibility Verification"])]
-    for _, row in patient_access_df.iterrows():
+    for _, row in df[df["Stage"].isin(["Patient Scheduling", "Patient Registration", "Insurance Verification", "Eligibility Verification"])].iterrows():
         stage_card(row)
 
 elif page == "Prior Authorization Risk":
@@ -285,22 +197,13 @@ elif page == "Prior Authorization Risk":
 elif page == "Documentation Integrity":
     st.title("Documentation Integrity")
     st.write("This section connects clinical documentation and coding readiness to revenue cycle performance.")
-    documentation_df = df[df["Stage"].isin(["Clinical Documentation", "Coding Readiness"])]
-    for _, row in documentation_df.iterrows():
+    for _, row in df[df["Stage"].isin(["Clinical Documentation", "Coding Readiness"])].iterrows():
         stage_card(row)
 
 elif page == "Denial Prevention":
     stage_card(df[df["Stage"] == "Denial Prevention"].iloc[0])
     st.markdown("## Denial Root-Cause Review Questions")
-    questions = [
-        "Where was the denial discovered?",
-        "Where did the workflow first lose control?",
-        "Was the issue preventable?",
-        "Which team first touched the risk?",
-        "Which metric changed?",
-        "What improvement action prevents recurrence?"
-    ]
-    for q in questions:
+    for q in ["Where was the denial discovered?", "Where did the workflow first lose control?", "Was the issue preventable?", "Which team first touched the risk?", "Which metric changed?", "What improvement action prevents recurrence?"]:
         st.checkbox(q)
 
 elif page == "A/R Follow-Up":
@@ -312,19 +215,16 @@ elif page == "Payment Posting":
 elif page == "Financial Outcome Dashboard":
     st.title("Financial Outcome Dashboard")
     st.write("This simulated dashboard shows how workflow risk affects financial outcomes.")
-
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Simulated Clean Claim Rate", "87%", "-4% risk")
     col2.metric("Simulated Denial Rate", "13%", "+3% risk")
     col3.metric("Simulated Days in A/R", "41 days", "+6 days")
     col4.metric("Simulated Payment Posting Accuracy", "94%", "-2% risk")
-
     category_risk = df.groupby("Category", as_index=False)["Risk Score"].mean()
     category_risk["Risk Score"] = category_risk["Risk Score"].round(0).astype(int)
     category_risk["Risk Level"] = "Simulated category average"
     category_risk["Metric Affected"] = "Category risk visibility"
     orange_risk_bars(category_risk, "Financial Risk by Workflow Category", "Category")
-
     st.markdown("## Simulated Financial Impact Logic")
     st.write("""
     - Front-end errors can reduce clean claim performance.
@@ -346,25 +246,11 @@ elif page == "Executive Summary":
     5. Executive visibility should connect financial outcomes to operational root causes.
     """)
     st.markdown("## Recruiter-Facing Explanation")
-    st.markdown(
-        """
-        <div class='brand-callout'>
-        I created this simulated healthcare operations dashboard to demonstrate how patient access, eligibility verification, prior authorization, clinical documentation, coding readiness, claim submission, denial prevention, A/R follow-up, payment posting, and executive financial visibility connect as one revenue cycle system. The project uses synthetic no-PHI examples and focuses on identifying where the workflow first lost control.
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    st.markdown("""<div class='brand-callout'>I created this simulated healthcare operations dashboard to demonstrate how patient access, eligibility verification, prior authorization, clinical documentation, coding readiness, claim submission, denial prevention, A/R follow-up, payment posting, and executive financial visibility connect as one revenue cycle system. The project uses synthetic no-PHI examples and focuses on identifying where the workflow first lost control.</div>""", unsafe_allow_html=True)
 
 elif page == "Disclaimer":
     st.title("Disclaimer")
-    st.markdown(
-        """
-        <div class='brand-callout'>
-        <strong>Disclaimer:</strong> This is a simulated educational portfolio project created for healthcare operations learning and career development. It uses synthetic no-PHI examples only and is not intended for clinical, coding, billing, legal, reimbursement, or patient-care decision-making.
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    st.markdown("""<div class='brand-callout'><strong>Disclaimer:</strong> This is a simulated educational portfolio project created for healthcare operations learning and career development. It uses synthetic no-PHI examples only and is not intended for clinical, coding, billing, legal, reimbursement, or patient-care decision-making.</div>""", unsafe_allow_html=True)
     st.markdown("## No-PHI Statement")
     st.write("This app does not include real patient data, protected health information, payer data, employer data, claims data, clinical records, financial records, or confidential organizational information.")
     st.markdown("## Educational Purpose")
