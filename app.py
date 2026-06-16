@@ -10,8 +10,6 @@ st.set_page_config(
 TENNESSEE_ORANGE = "#FF8200"
 BLACK = "#000000"
 WHITE = "#FFFFFF"
-LIGHT_ORANGE = "#FFF4E8"
-LIGHT_BORDER = "#F2D0A8"
 
 st.markdown(
     f"""
@@ -22,10 +20,25 @@ st.markdown(
         background-color: {WHITE} !important;
         color: {BLACK} !important;
     }}
-    [data-testid="stSidebar"] {{ border-right: 2px solid {TENNESSEE_ORANGE} !important; }}
-    h1, h2, h3, h4, h5, h6, p, div, span, label, li, td, th {{ color: {BLACK} !important; }}
-    h1 {{ font-weight: 900 !important; letter-spacing: -0.03em !important; }}
-    h2 {{ font-weight: 850 !important; letter-spacing: -0.02em !important; }}
+
+    [data-testid="stSidebar"] {{
+        border-right: 3px solid {TENNESSEE_ORANGE} !important;
+        background-color: {WHITE} !important;
+    }}
+
+    h1, h2, h3, h4, h5, h6, p, div, span, label, li, td, th {{
+        color: {BLACK} !important;
+    }}
+
+    h1 {{
+        font-weight: 900 !important;
+        letter-spacing: -0.03em !important;
+    }}
+
+    h2 {{
+        font-weight: 850 !important;
+        letter-spacing: -0.02em !important;
+    }}
 
     /* Hide Streamlit automatic heading anchor/link icons for a cleaner portfolio look */
     h1 a[href^="#"], h2 a[href^="#"], h3 a[href^="#"],
@@ -35,11 +48,42 @@ st.markdown(
         visibility: hidden !important;
     }}
 
-    .orange-divider {{ border-top: 4px solid {TENNESSEE_ORANGE}; margin-top: 18px; margin-bottom: 28px; }}
-    .brand-callout {{ border-left: 8px solid {TENNESSEE_ORANGE}; background-color: {LIGHT_ORANGE}; padding: 18px; border-radius: 10px; margin-bottom: 20px; color: {BLACK}; }}
-    div[data-testid="stExpander"] {{ border: 1.5px solid {LIGHT_BORDER} !important; border-radius: 14px !important; background-color: {WHITE} !important; box-shadow: none !important; }}
-    button, [role="button"] {{ color: {BLACK} !important; }}
-    div[role="radiogroup"] label span:first-child {{ border-color: {TENNESSEE_ORANGE} !important; }}
+    .orange-divider {{
+        border-top: 5px solid {TENNESSEE_ORANGE} !important;
+        margin-top: 18px;
+        margin-bottom: 28px;
+    }}
+
+    .brand-callout {{
+        border: 3px solid {TENNESSEE_ORANGE} !important;
+        border-left: 10px solid {TENNESSEE_ORANGE} !important;
+        background-color: {WHITE} !important;
+        padding: 18px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        color: {BLACK};
+    }}
+
+    div[data-testid="stExpander"] {{
+        border: 2px solid {TENNESSEE_ORANGE} !important;
+        border-radius: 14px !important;
+        background-color: {WHITE} !important;
+        box-shadow: none !important;
+    }}
+
+    div[data-testid="stExpander"] details,
+    div[data-testid="stExpander"] summary,
+    div[data-testid="stExpander"] div {{
+        background-color: {WHITE} !important;
+    }}
+
+    button, [role="button"] {{
+        color: {BLACK} !important;
+    }}
+
+    div[role="radiogroup"] label span:first-child {{
+        border-color: {TENNESSEE_ORANGE} !important;
+    }}
 
     .metric-grid {{
         display: grid;
@@ -47,33 +91,77 @@ st.markdown(
         gap: 14px;
         margin-bottom: 18px;
     }}
+
     .metric-box {{
-        border: 1.5px solid {LIGHT_BORDER};
+        border: 2.5px solid {TENNESSEE_ORANGE} !important;
         border-radius: 16px;
         padding: 14px;
-        background: {WHITE};
+        background: {WHITE} !important;
         min-width: 0;
     }}
+
     .metric-label {{
         font-size: 0.9rem;
         font-weight: 750;
         margin-bottom: 8px;
+        color: {BLACK} !important;
     }}
+
     .metric-value {{
         font-size: 1.35rem;
         line-height: 1.2;
         font-weight: 850;
         overflow-wrap: anywhere;
         word-break: normal;
+        color: {BLACK} !important;
     }}
-    .metric-value-orange {{ color: {TENNESSEE_ORANGE} !important; }}
 
-    .risk-card {{ border: 1.5px solid {LIGHT_BORDER}; border-radius: 16px; padding: 16px; margin-bottom: 14px; background: {WHITE}; }}
-    .risk-card-title {{ font-size: 1.05rem; font-weight: 800; margin-bottom: 4px; }}
-    .risk-card-meta {{ font-size: 0.92rem; margin-bottom: 10px; }}
-    .risk-bar-track {{ width: 100%; height: 18px; border: 1px solid {TENNESSEE_ORANGE}; border-radius: 999px; background: {WHITE}; overflow: hidden; }}
-    .risk-bar-fill {{ height: 100%; background: {TENNESSEE_ORANGE}; border-radius: 999px; }}
-    .risk-score-label {{ font-size: 0.92rem; font-weight: 800; margin-top: 6px; color: {BLACK}; }}
+    .metric-value-orange {{
+        color: {TENNESSEE_ORANGE} !important;
+    }}
+
+    .risk-card {{
+        border: 2.5px solid {TENNESSEE_ORANGE} !important;
+        border-radius: 16px;
+        padding: 16px;
+        margin-bottom: 14px;
+        background: {WHITE} !important;
+    }}
+
+    .risk-card-title {{
+        font-size: 1.05rem;
+        font-weight: 800;
+        margin-bottom: 4px;
+        color: {BLACK} !important;
+    }}
+
+    .risk-card-meta {{
+        font-size: 0.92rem;
+        margin-bottom: 10px;
+        color: {BLACK} !important;
+    }}
+
+    .risk-bar-track {{
+        width: 100%;
+        height: 18px;
+        border: 2px solid {TENNESSEE_ORANGE} !important;
+        border-radius: 999px;
+        background: {WHITE} !important;
+        overflow: hidden;
+    }}
+
+    .risk-bar-fill {{
+        height: 100%;
+        background: {TENNESSEE_ORANGE} !important;
+        border-radius: 999px;
+    }}
+
+    .risk-score-label {{
+        font-size: 0.92rem;
+        font-weight: 800;
+        margin-top: 6px;
+        color: {BLACK} !important;
+    }}
 
     @media (max-width: 760px) {{
         .metric-grid {{ grid-template-columns: 1fr; }}
@@ -182,7 +270,7 @@ if page == "Home":
     col1.metric("Workflow Stages", "12")
     col2.metric("Highest Risk Score", f"{df['Risk Score'].max()}/100")
     col3.metric("Average Risk Score", f"{round(df['Risk Score'].mean(), 1)}/100")
-    col4.metric("Critical Risk Areas", len(df[df["Risk Level"] == "Critical"]))
+    col4.metric("Critical Risk Areas", len(df[df["Risk Level"] == "Critical"))
     st.markdown("## Portfolio Positioning")
     st.write("This simulated project demonstrates healthcare operations thinking across the full revenue cycle. It connects workflow risk, staff rework, patient experience, financial performance, denial prevention, and leadership visibility using synthetic no-PHI examples only.")
 
